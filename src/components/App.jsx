@@ -35,9 +35,10 @@ export const App = () => {
     if (searchQuery) {
       try {
         fetchData();
-      } catch (error) {
-        setError(error);
+      } catch (err) {
+        setError(err);
         setLoading(false);
+        console.log(error);
       } 
     }
   }, [searchQuery, pageNumber]);
