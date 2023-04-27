@@ -32,10 +32,12 @@ export const App = () => {
             return { id, webformatURL, largeImageURL };
           }
         );
-        setPictures((pics) => {return [...pics, ...newPictures]});
+        setPictures(pics => {
+          return [...pics, ...newPictures];
+        });
         setShowButton(pageNumber < Math.ceil(picturesAmount / 12));
       } catch (error) {
-        setError(error)
+        setError(error);
       } finally {
         setLoading(false);
       }
@@ -43,21 +45,20 @@ export const App = () => {
     fetchData();
   }, [searchQuery, pageNumber]);
 
-  const handleSearch = (value) => {
+  const handleSearch = value => {
     setSearchQuery(value);
     setPageNumber(1);
+    setPictures([]);
   };
 
-  const showLargeImg = (url) => {
+  const showLargeImg = url => {
     setLargeImgUrl(url);
     setShowModal(true);
-  }
+  };
 
   return (
     <>
-      <Seachbar
-        onSubmit={handleSearch}
-      />
+      <Seachbar onSubmit={handleSearch} />
       {pictures.length > 0 && (
         <ImageGallery
           pics={pictures}
@@ -70,7 +71,7 @@ export const App = () => {
       {showButton === true && (
         <Button
           onClick={() => {
-            setPageNumber((prevPage) => prevPage + 1);
+            setPageNumber(prevPage => prevPage + 1);
           }}
         />
       )}
