@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Seachbar from './Searchbar';
 import ImageGallery from './ImageGallery';
 import Button from './Button';
@@ -13,60 +13,64 @@ export const App = () => {
   const [largeImgUrl, setLargeImgUrl] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showButton, setShowButton] = useState(false);
-  const pictures = useRef([]);
-  const error = useRef(null);
+  const [pictures, setPictures] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setShowButton(false);
-      const fetchedPictures = await API.searchPictures(searchQuery, pageNumber);
-      const picturesAmount = fetchedPictures.totalHits;
-      const newPictures = fetchedPictures.hits.map(
-        ({ id, webformatURL, largeImageURL }) => {
-          return { id, webformatURL, largeImageURL };
-        }
-      );
-      pictures.current = [...pictures.current, ...newPictures];
-      setShowButton(pageNumber < Math.ceil(picturesAmount / 12));
-      setLoading(false);
-    };
+    if (!searchQuery) return;
 
-    if (searchQuery) {
+    const fetchData = async () => {
       try {
-        fetchData();
-      } catch (err) {
-        error.current = err;
+        setLoading(true);
+        const fetchedPictures = await API.searchPictures(
+          searchQuery,
+          pageNumber
+        );
+        const picturesAmount = fetchedPictures.totalHits;
+        const newPictures = fetchedPictures.hits.map(
+          ({ id, webformatURL, largeImageURL }) => {
+            return { id, webformatURL, largeImageURL };
+          }
+        );
+        setPictures((pics) => {return [...pics, ...newPictures]});
+        setShowButton(pageNumber < Math.ceil(picturesAmount / 12));
+      } catch (error) {
+        setError(error)
+      } finally {
         setLoading(false);
-        console.log(error.current);
-      } 
-    }
+      }
+    };
+    fetchData();
   }, [searchQuery, pageNumber]);
+
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+    setPageNumber(1);
+  };
+
+  const showLargeImg = (url) => {
+    setLargeImgUrl(url);
+    setShowModal(true);
+  }
 
   return (
     <>
       <Seachbar
-        onSubmit={value => {
-          pictures.current = [];
-          setSearchQuery(value);
-          setPageNumber(1);
-        }}
+        onSubmit={handleSearch}
       />
-      {pictures.current.length > 0 && (
+      {pictures.length > 0 && (
         <ImageGallery
-          pics={pictures.current}
-          onClick={url => {
-            setLargeImgUrl(url);
-            setShowModal(true);
-          }}
+          pics={pictures}
+          onClick={showLargeImg}
           pageNumber={pageNumber}
         />
       )}
       {isLoading && <Loader />}
-      {pictures.current.length > 0 && showButton === true && (
+      {error && <h2>{Error}</h2>}
+      {showButton === true && (
         <Button
           onClick={() => {
-            setPageNumber(pageNumber + 1);
+            setPageNumber((prevPage) => prevPage + 1);
           }}
         />
       )}
