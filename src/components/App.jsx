@@ -10,11 +10,11 @@ export const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pageNumber, setPageNumber] = useState(1);
   const [isLoading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [largeImgUrl, setLargeImgUrl] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showButton, setShowButton] = useState(false);
   const pictures = useRef([]);
+  const error = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,9 +36,9 @@ export const App = () => {
       try {
         fetchData();
       } catch (err) {
-        setError(err);
+        error.current = err;
         setLoading(false);
-        console.log(error);
+        console.log(error.current);
       } 
     }
   }, [searchQuery, pageNumber]);
